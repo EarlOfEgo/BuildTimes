@@ -14,7 +14,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Get insights of your build times. you can todo
+    Get insights of your build times. This plugin records the execution times of your builds, so you can see if they go up or down.
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
@@ -24,6 +24,9 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="dev.hagios.buildtimes.services.BuildTimesService" />
+        <toolWindow factoryClass="dev.hagios.buildtimes.extensions.BuildTimesWindowsFactory" id="Build Times" anchor="right"/>
     </extensions>
+    <projectListeners>
+                <listener class="dev.hagios.buildtimes.listeners.BuildListener" topic="com.intellij.execution.ExecutionListener" />
+    </projectListeners>
 </idea-plugin>

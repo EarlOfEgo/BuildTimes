@@ -2,23 +2,25 @@ package dev.hagios.buildtimes.services
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.thisLogger
-import com.intellij.openapi.project.Project
 
+
+@Service(Service.Level.PROJECT)
 @State(
     name = "BuildTimesService", storages = [
         Storage("BuildTimesService.xml")
     ]
 )
-class BuildTimesService(
-    private val project: Project
-) : PersistentStateComponent<Statistics>, Disposable {
+class BuildTimesService : PersistentStateComponent<Statistics>, Disposable {
 
     private var state = Statistics()
 
-    override fun getState(): Statistics = state
+    override fun getState(): Statistics {
+        return state
+    }
 
     override fun loadState(state: Statistics) {
         this.state = state
