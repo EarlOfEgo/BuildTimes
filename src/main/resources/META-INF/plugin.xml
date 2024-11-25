@@ -32,6 +32,10 @@
                 id="com.example.ProjectSettingsConfigurable"
                 displayName="Build Times Settings"
                 nonDefaultProject="true"/>
+
+        <notificationGroup id="BuildTimes Notifications"
+                           displayType="BALLOON"
+                           key="notifications.warnings"/>
     </extensions>
     <projectListeners>
         <listener class="dev.hagios.buildtimes.listeners.BuildListener"
