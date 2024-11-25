@@ -24,9 +24,18 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="dev.hagios.buildtimes.extensions.BuildTimesWindowsFactory" id="Build Times" anchor="right"/>
+        <toolWindow factoryClass="dev.hagios.buildtimes.extensions.BuildTimesWindowsFactory" id="Build Times"
+                    anchor="right"/>
+        <projectConfigurable
+                parentId="tools"
+                instance="dev.hagios.buildtimes.settings.BuildTimesSettingsConfigurable"
+                id="com.example.ProjectSettingsConfigurable"
+                displayName="Build Times Settings"
+                nonDefaultProject="true"/>
     </extensions>
     <projectListeners>
-                <listener class="dev.hagios.buildtimes.listeners.BuildListener" topic="com.intellij.execution.ExecutionListener" />
+        <listener class="dev.hagios.buildtimes.listeners.BuildListener"
+                  topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>
+
 </idea-plugin>

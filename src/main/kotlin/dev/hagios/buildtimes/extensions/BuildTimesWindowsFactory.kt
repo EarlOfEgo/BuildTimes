@@ -16,16 +16,16 @@ import java.time.format.DateTimeFormatter
 class BuildTimesWindowsFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val myToolWindow = MyToolWindow(toolWindow)
+        val myToolWindow = MyToolWindow(project)
         val content = ContentFactory.getInstance().createContent(myToolWindow.getContent(), null, false)
         toolWindow.contentManager.addContent(content)
     }
 
     override fun shouldBeAvailable(project: Project) = true
 
-    class MyToolWindow(toolWindow: ToolWindow) {
+    class MyToolWindow(project: Project) {
 
-        private val service = toolWindow.project.service<BuildTimesService>()
+        private val service = project.service<BuildTimesService>()
 
         fun getContent() = panel {
             row {
