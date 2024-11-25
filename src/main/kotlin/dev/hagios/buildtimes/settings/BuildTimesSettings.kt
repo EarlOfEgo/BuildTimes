@@ -1,6 +1,5 @@
 package dev.hagios.buildtimes.settings
 
-import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.SimplePersistentStateComponent
 import com.intellij.openapi.project.Project
@@ -8,7 +7,7 @@ import com.intellij.openapi.components.*
 
 @Service(Service.Level.PROJECT)
 @State(name = "BuildTimesSettings", storages = [(Storage("buildtimes.xml"))])
-class BuildTimesSettings (internal val project: Project): SimplePersistentStateComponent<BuildTimesSettingsState>(BuildTimesSettingsState()) {
+class BuildTimesSettings: SimplePersistentStateComponent<BuildTimesSettingsState>(BuildTimesSettingsState()) {
     var areNotificationsEnabled
         get() = state.areNotificationsEnabled
         set(value) {
@@ -26,7 +25,3 @@ class BuildTimesSettings (internal val project: Project): SimplePersistentStateC
     }
 }
 
-class BuildTimesSettingsState: BaseState() {
-    var areNotificationsEnabled by property(true)
-    var notificationTime by property(5000)
-}

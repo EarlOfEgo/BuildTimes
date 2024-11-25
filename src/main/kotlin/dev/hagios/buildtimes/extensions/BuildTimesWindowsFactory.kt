@@ -9,6 +9,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
+import dev.hagios.buildtimes.services.Build
 import dev.hagios.buildtimes.services.BuildTimesService
 import kotlinx.datetime.*
 import java.time.format.DateTimeFormatter
@@ -33,7 +34,15 @@ class BuildTimesWindowsFactory : ToolWindowFactory, DumbAware {
                 text("Duration")
                 text("Finished")
             }.layout(RowLayout.PARENT_GRID)
-            service.state.builds.reversed().forEachIndexed { index, build ->
+            service.state.buildStartTimes.mapNotNull {
+                val startTime = it
+                val endTime = service.state.buildEndTimes[it] ?: return@mapNotNull null
+                val successful = service.state.buildSuccessful[it] ?: return@mapNotNull null
+                Build(startTime, endTime, successful)
+            }
+                .mapIndexed { index, build -> index +1 to build }
+                .reversed()
+                .forEach { (index, build) ->
                 row {
                     val buildTime = build.ended - build.started
                     val finishTime =

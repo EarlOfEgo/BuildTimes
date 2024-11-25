@@ -3,10 +3,7 @@ package dev.hagios.buildtimes.services
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import dev.hagios.buildtimes.settings.BuildTimesSettings
@@ -20,21 +17,22 @@ import dev.hagios.buildtimes.settings.BuildTimesSettings
 )
 class BuildTimesService(
     private val project: Project
-) : PersistentStateComponent<Statistics>, Disposable {
+) : SimplePersistentStateComponent<Statistics>(Statistics()), Disposable {
 
-    private var state = Statistics()
+//    private var state = Statistics()
     private val settings = BuildTimesSettings.getInstance(project)
 
-    override fun getState(): Statistics {
-        return state
-    }
-
-    override fun loadState(state: Statistics) {
-        this.state = state
+    val builds: List<Build> = state.buildStartTimes.mapNotNull {
+        val startTime = it
+        val endTime = state.buildEndTimes[it] ?: return@mapNotNull null
+        val successful = state.buildSuccessful[it] ?: return@mapNotNull null
+        Build(startTime, endTime, successful)
     }
 
     fun addBuildTime(startTime: Long, endTime: Long, successful: Boolean) {
-        state = state.copy(builds = state.builds + Build(startTime, endTime, successful))
+        state.buildStartTimes.add(startTime)
+        state.buildEndTimes[startTime] = endTime
+        state.buildSuccessful[startTime] = successful
         val totalTime = endTime - startTime
         if (totalTime > settings.notificationTime && settings.areNotificationsEnabled) {
             NotificationGroupManager.getInstance()
@@ -52,9 +50,11 @@ class BuildTimesService(
     }
 }
 
-data class Statistics(
-    val builds: List<Build> = emptyList()
-)
+class Statistics: BaseState() {
+    var buildStartTimes by list<Long>()
+    var buildEndTimes by map<Long, Long>()
+    var buildSuccessful by map<Long, Boolean>()
+}
 
 data class Build(
     val started: Long,
