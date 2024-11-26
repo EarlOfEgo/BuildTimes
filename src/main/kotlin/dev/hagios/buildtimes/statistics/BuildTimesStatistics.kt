@@ -1,4 +1,4 @@
-package dev.hagios.buildtimes.services
+package dev.hagios.buildtimes.statistics
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
         Storage("BuildTimesService.xml")
     ]
 )
-class BuildTimesService(
+class BuildTimesStatistics(
     private val project: Project
 ) : SimplePersistentStateComponent<Statistics>(Statistics()), Disposable {
 
@@ -51,8 +51,3 @@ class BuildTimesService(
     }
 }
 
-class Statistics: BaseState() {
-    var buildStartTimes by list<Long>()
-    var buildEndTimes by map<Long, Long>()
-    var buildSuccessful by map<Long, Boolean>()
-}

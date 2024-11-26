@@ -9,17 +9,17 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
-import dev.hagios.buildtimes.services.BuildTimesService
+import dev.hagios.buildtimes.statistics.BuildTimesStatistics
 
 class BuildListener(
     project: Project
 ) : ExecutionListener, BuildProgressListener {
 
-    private val buildTimesService = project.service<BuildTimesService>()
+    private val buildTimesStatistics = project.service<BuildTimesStatistics>()
 
     init {
         val buildViewManager = project.service<BuildViewManager>()
-        buildViewManager.addListener(this, buildTimesService)
+        buildViewManager.addListener(this, buildTimesStatistics)
     }
 
     override fun processStarted(executorId: String, env: ExecutionEnvironment, handler: ProcessHandler) {
@@ -47,8 +47,8 @@ class BuildListener(
             val buildStart = buildStarts[buildId]
             val buildEnd = event.eventTime
             when (event.result) {
-               is FailureResult -> buildStart?.let { buildTimesService.addBuildTime(it, buildEnd, false) }
-               is SuccessResult -> buildStart?.let { buildTimesService.addBuildTime(it, buildEnd, true) }
+               is FailureResult -> buildStart?.let { buildTimesStatistics.addBuildTime(it, buildEnd, false) }
+               is SuccessResult -> buildStart?.let { buildTimesStatistics.addBuildTime(it, buildEnd, true) }
             }
         }
     }

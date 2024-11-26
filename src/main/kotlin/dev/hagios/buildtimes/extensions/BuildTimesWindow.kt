@@ -9,8 +9,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.util.ui.components.BorderLayoutPanel
-import dev.hagios.buildtimes.services.BuildTimesService
+import dev.hagios.buildtimes.statistics.BuildTimesStatistics
 import dev.hagios.buildtimes.settings.BuildTimesSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,14 +22,14 @@ import javax.swing.JPanel
 
 class BuildTimesWindow(project: Project) {
 
-    private val buildTimesService = project.service<BuildTimesService>()
+    private val buildTimesStatistics = project.service<BuildTimesStatistics>()
     private val settings = project.service<BuildTimesSettings>()
     private val coroutineScope = CoroutineScope(Dispatchers.EDT)
     private val panel: JPanel = DialogPanel()
 
     init {
         coroutineScope.launch {
-            buildTimesService.buildStartTimes.collect {
+            buildTimesStatistics.buildStartTimes.collect {
                 updateContent()
             }
         }
@@ -61,11 +60,11 @@ class BuildTimesWindow(project: Project) {
     }
 
     private fun Panel.populateBuildRows() {
-        buildTimesService.state.buildStartTimes.mapNotNull {
+        buildTimesStatistics.state.buildStartTimes.mapNotNull {
             val startTime = it
-            val endTime = buildTimesService.state.buildEndTimes[it] ?: return@mapNotNull null
-            val successful = buildTimesService.state.buildSuccessful[it] ?: return@mapNotNull null
-            Build(0, startTime, endTime, successful)
+            val endTime = buildTimesStatistics.state.buildEndTimes[it] ?: return@mapNotNull null
+            val successful = buildTimesStatistics.state.buildSuccessful[it] ?: return@mapNotNull null
+            Build(startTime, endTime, successful)
         }
             .filter { if (settings.showFailedBuilds) true else it.successful }
             .mapIndexed { index, build -> index + 1 to build }
@@ -100,7 +99,6 @@ class BuildTimesWindow(project: Project) {
 }
 
 private data class Build(
-    val number: Int = 0,
     val started: Long,
     val ended: Long,
     val successful: Boolean,

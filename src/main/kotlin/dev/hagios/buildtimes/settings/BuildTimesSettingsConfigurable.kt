@@ -6,7 +6,7 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.*
 
-class BuildTimesSettingsConfigurable(private val project: Project) : BoundConfigurable("OINK") {
+class BuildTimesSettingsConfigurable(project: Project) : BoundConfigurable("Build Times") {
     val buildTimesSettings = BuildTimesSettings.getInstance(project)
 
     override fun createPanel(): DialogPanel = panel {
