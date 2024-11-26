@@ -11,15 +11,22 @@ class BuildTimesSettingsConfigurable(private val project: Project) : BoundConfig
 
     override fun createPanel(): DialogPanel = panel {
         lateinit var checkBox: Cell<JBCheckBox>
-        row {
-            checkBox = checkBox("Show Notification when build takes longer")
-                .bindSelected(buildTimesSettings::areNotificationsEnabled)
-        }.layout(RowLayout.PARENT_GRID)
-        row("Notification time (ms)") {
-            intTextField()
-                .bindIntText(buildTimesSettings::notificationTime)
-        }.layout(RowLayout.PARENT_GRID).enabledIf(checkBox.selected)
+        group("Notifications") {
+            row {
+                checkBox = checkBox("Show Notification when build takes longer")
+                    .bindSelected(buildTimesSettings::areNotificationsEnabled)
+            }.layout(RowLayout.PARENT_GRID)
+            row("Notification time (ms)") {
+                intTextField()
+                    .bindIntText(buildTimesSettings::notificationTime)
+            }.layout(RowLayout.PARENT_GRID).enabledIf(checkBox.selected)
+        }
+        group("Display") {
+            row {
+                checkBox = checkBox("Show failed builds in overview")
+                    .bindSelected(buildTimesSettings::showFailedBuilds)
+            }.layout(RowLayout.PARENT_GRID)
+        }
     }
-
 }
 

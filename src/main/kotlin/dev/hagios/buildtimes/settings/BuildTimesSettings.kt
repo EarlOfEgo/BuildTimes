@@ -20,6 +20,12 @@ class BuildTimesSettings: SimplePersistentStateComponent<BuildTimesSettingsState
             state.notificationTime = value
         }
 
+    var showFailedBuilds
+        get() = state.showFailedBuilds
+        set(value) {
+            state.showFailedBuilds = value
+        }
+
     companion object {
         fun getInstance(project: Project): BuildTimesSettings = project.service()
     }

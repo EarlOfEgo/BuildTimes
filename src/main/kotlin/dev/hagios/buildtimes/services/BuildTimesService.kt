@@ -55,11 +55,4 @@ class Statistics: BaseState() {
     var buildStartTimes by list<Long>()
     var buildEndTimes by map<Long, Long>()
     var buildSuccessful by map<Long, Boolean>()
-    var testo by string()
 }
-
-data class Build(
-    val started: Long,
-    val ended: Long,
-    val successful: Boolean,
-)

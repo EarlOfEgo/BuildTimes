@@ -4,25 +4,33 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.*
-import dev.hagios.buildtimes.services.Build
+import com.intellij.ui.components.DialogPanel
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.RowLayout
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.hagios.buildtimes.services.BuildTimesService
+import dev.hagios.buildtimes.settings.BuildTimesSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import java.awt.BorderLayout
 import java.time.format.DateTimeFormatter
 import javax.swing.JPanel
 
+
 class BuildTimesWindow(project: Project) {
 
-    private val service = project.service<BuildTimesService>()
+    private val buildTimesService = project.service<BuildTimesService>()
+    private val settings = project.service<BuildTimesSettings>()
     private val coroutineScope = CoroutineScope(Dispatchers.EDT)
-    private val panel: JPanel = JPanel()
+    private val panel: JPanel = DialogPanel()
 
     init {
         coroutineScope.launch {
-            service.buildStartTimes.collect {
+            buildTimesService.buildStartTimes.collect {
                 updateContent()
             }
         }
@@ -35,7 +43,8 @@ class BuildTimesWindow(project: Project) {
     private fun updateContent() {
         panel.removeAll()
         val newContent = generateContentPanel()
-        panel.add(newContent)
+        val scrollPane = JBScrollPane(newContent)
+        panel.add(scrollPane, BorderLayout.CENTER)
         panel.revalidate()
         panel.repaint()
     }
@@ -47,17 +56,18 @@ class BuildTimesWindow(project: Project) {
                 text("Duration")
                 text("Finished")
             }.layout(RowLayout.PARENT_GRID)
-            populateBuildRows()
+                populateBuildRows()
         }
     }
 
     private fun Panel.populateBuildRows() {
-        service.state.buildStartTimes.mapNotNull {
+        buildTimesService.state.buildStartTimes.mapNotNull {
             val startTime = it
-            val endTime = service.state.buildEndTimes[it] ?: return@mapNotNull null
-            val successful = service.state.buildSuccessful[it] ?: return@mapNotNull null
-            Build(startTime, endTime, successful)
+            val endTime = buildTimesService.state.buildEndTimes[it] ?: return@mapNotNull null
+            val successful = buildTimesService.state.buildSuccessful[it] ?: return@mapNotNull null
+            Build(0, startTime, endTime, successful)
         }
+            .filter { if (settings.showFailedBuilds) true else it.successful }
             .mapIndexed { index, build -> index + 1 to build }
             .reversed()
             .forEach { (index, build) ->
@@ -89,6 +99,13 @@ class BuildTimesWindow(project: Project) {
     }
 }
 
+private data class Build(
+    val number: Int = 0,
+    val started: Long,
+    val ended: Long,
+    val successful: Boolean,
+)
+
 fun formatDuration(milliseconds: Long): String {
     return when {
         milliseconds >= 60_000 -> {
@@ -96,10 +113,12 @@ fun formatDuration(milliseconds: Long): String {
             val seconds = (milliseconds % 60_000) / 1000
             "${minutes}m ${seconds}s"
         }
+
         milliseconds >= 1000 -> {
             val seconds = milliseconds / 1000
             "${seconds}s"
         }
+
         else -> {
             "${milliseconds}ms"
         }
